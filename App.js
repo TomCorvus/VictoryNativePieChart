@@ -6,107 +6,84 @@
  * @flow strict-local
  */
 
-import React from 'react';
-import type {Node} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import React, {useState, useCallback, useMemo} from 'react';
+import {SafeAreaView, View} from 'react-native';
+import {VictoryPie} from 'victory-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const App = () => {
+  const [selectedSegmentId, setSelectSegment] = useState<number>(0);
 
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
+  const data = useMemo(
+    () => [
+      {id: 1, x: 'Cats', y: 15, color: 'red'},
+      {id: 2, x: 'Dogs', y: 30, color: 'green'},
+      {id: 3, x: 'Birds', y: 15, color: 'yellow'},
+      {id: 4, x: 'Squirrels', y: 10, color: 'purple'},
+      {id: 5, x: 'Foxes', y: 20, color: 'cyan'},
+      {id: 6, x: 'Dinosaurs', y: 10, color: 'pink'},
+    ],
+    [],
   );
-};
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+  /**
+   * Select a segment
+   * @param id
+   */
+  const onSelectSegment = useCallback(
+    clickedSegmentId => {
+      let nextSelectedSegmentId = clickedSegmentId;
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+      if (data === null || data?.length === 0) {
+        nextSelectedSegmentId = 0;
+      }
+
+      setSelectSegment(nextSelectedSegmentId);
+    },
+    [data],
+  );
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
+    <SafeAreaView style={{flex: 1}}>
+      <View style={{flex: 1, backgroundColor: '#1a1a1a'}}>
+        <VictoryPie
+          labels={() => ''}
+          innerRadius={50}
+          height={350}
+          width={350}
+          externalEventMutations={data}
+          animate={{
+            duration: 800,
+            onLoad: {duration: 800},
+          }}
           style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+            data: {
+              opacity: ({datum}) => (datum.id === selectedSegmentId ? 1 : 0.2),
+              fill: ({datum}) => datum.color || '#000000',
+              stroke: ({datum}) =>
+                datum.id === selectedSegmentId ? '#CCCCCC' : '#FFFFFF',
+              strokeWidth: 0,
+            },
+          }}
+          events={[
+            {
+              target: 'data',
+              eventHandlers: {
+                onPress: () => [
+                  {
+                    target: 'data',
+                    mutation: chartData => {
+                      onSelectSegment(chartData.datum.id);
+                    },
+                  },
+                ],
+              },
+            },
+          ]}
+          data={data}
+        />
+      </View>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;
