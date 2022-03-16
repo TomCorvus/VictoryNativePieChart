@@ -13,7 +13,7 @@
     "react": "17.0.2",
     "react-native": "0.65.1",
     "react-native-svg": "^12.1.1",
-    "victory-native": "^35.5.4"
+    "victory-native": "^36.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
